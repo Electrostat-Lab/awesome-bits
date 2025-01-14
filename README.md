@@ -2,8 +2,8 @@
 
 > A curated list of awesome bitwise operations and tricks
 >
-> Maintainer - [Keon Kim](https://github.com/keonkim)
-> Please feel free to [pull requests](https://github.com/keonkim/awesome-bits/pulls)
+> Main Author - [Keon Kim](https://github.com/keonkim)
+> Maintainer - [Pavly G.](https://github.com/pavly-gerges)
 
 
 
