@@ -569,6 +569,14 @@ uint8_t switching_xor(SWITCHING_TYPE **inputs, SWITCHING_TYPE *output){
 ```
 
 **An algorithm to read analog data sent to the UART register in 8-bit frames:**
+> [!NOTE]
+> * **Idea**: Read the analog signals sent from an ADC register into the UART register over wire.
+> * **Formalization**:
+>   * Let, $$F$$ be a set of frames composed of 8 bits per frame (i.e., cardinality of 8 members),
+>   * therefore: $$F = \\{f_n: f_n = \\{Bit_0, Bit_1, Bit_2, Bit_3, Bit_4, Bit_5, Bit_6, Bit_7\\} \land n \in N\\}$$;
+>   * Now, let $$R$$ be the resolution of the ADC register in digital decimal format (e.g., if 10-bit resolution is selected, then the equivalent decimal is $$(2^0 + 2^1 + 2^2 + 2^3 + 2^4 + 2^5 + 2^6 + 2^7 + 2^8 + 2^9) = 1023$$, and if 8-bit resolution is selected, then the equivalent decimal is $$255$$).
+>   * Let $$Reg_{UART}$$ be a hardware data register of the UART of $$|Reg_{UART}|$$-bit data register; then the number of frames required for the UART to read the data from an ADC of resolution $$R$$ (aka. the cardinality of the $$F$$) can be calculated by this formula: $$|F| = \lceil{|R| / |Reg_{UART}|}\rceil$$; which given an example of an 8-bit (255) ADC resolution signal needs 1 frame in order to be fully read by an 8-bit UART data register (i.e., $$|F| = \lceil{8-bit/8}\rceil = 1$$); unlike the 10-bit register data, the number of frames required to transfer a data of resolution 1023 or 10-bits will be $$|F| = \lceil{10/8}\rceil = 2$$.
+> 
 ```java
 @Override
 public void receive() {
