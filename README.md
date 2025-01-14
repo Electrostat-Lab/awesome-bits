@@ -542,9 +542,60 @@ uint8_t switching_xor(SWITCHING_TYPE **inputs, SWITCHING_TYPE *output){
     return 0;
 }
 ```
+**Test for a specific bit pattern in a value (From Serial4j-Electrostatic4j Framework):**
+```java
+ /**
+  * Test whether a flag constant exists in this flag.
+  *
+  * @param flag the flag constant to test against
+  * @return true if the flag exists, or false otherwise
+  */
+ public boolean hasFlag(FlagConst flag) {
+     return (value & flag.getValue()) == flag.getValue();
+ }
+```
+**Disables a specific bit pattern in a value (From Serial4j-Electrostatic4j Framework):**
+```java
+ /**
+  * Disables the flags specified by this parameter.
+  *
+  * @param flag the flag to disable
+  * @return this instance for chained calls
+  */
+ public AppendableFlag disable(FlagConst flag) {
+     this.value &= ~flag.getValue();
+     return this;
+ }
+```
 
-## Additional Resources
+**An algorithm to read analog data sent to the UART register in 8-bit frames:**
+```java
+@Override
+public void receive() {
+    super.decode(dataRegisterBufferLength -> {
+        for (int frame = 0; terminalDevice.iread(dataRegisterBufferLength) > 0 &&
+                frame < reportDescriptor.getReportLength(); frame++, inputClock.incrementAndGet()) {
+            final int data = terminalDevice.getBuffer()[0];
+            // obtain a shift-value scaled according to the current frame to place
+            // the bits in their right position
+            final int bits = frame * Constants.DEFAULT_DATA_REGISTER_BUFFER_LENGTH;
+            // replace the bits to the left aka. from LSB to MSB
+            // add the bits
+            inputBuffer.set(inputBuffer.intValue() | (data << bits));
+            // if the input clocks completed sending the report, flush the input and return the result
+            if (inputClock.get() == (reportDescriptor.getReportLength() - 1)) {
+                final int value = inputBuffer.get();
+                inputBuffer.set(0); // flush the input buffer
+                inputClock.set(0);
+                return value;
+            }
+        }
+        return null; // skip the decoder dispatch if no end-character is found
+    });
+}
+```
 
+## References:
 * [Bit Twiddling Hacks](https://graphics.stanford.edu/~seander/bithacks.html)
 * [Floating Point Hacks](https://github.com/leegao/float-hacks)
 * [Hacker's Delight](http://www.hackersdelight.org/)
@@ -552,4 +603,5 @@ uint8_t switching_xor(SWITCHING_TYPE **inputs, SWITCHING_TYPE *output){
 * [Bitwise Operations in C - Gamedev.net](https://www.gamedev.net/articles/programming/general-and-gameplay-programming/bitwise-operations-in-c-r1563/)
 * [Bitwise Operators YouTube](https://www.youtube.com/results?search_query=bitwise+operators)
 * [IEEE-1284 Module Library for parallel port programming - The ElectroKIO Project](https://github.com/Electrostat-Lab/Electrostatic-Sandbox/blob/master/electrostatic-sandbox-framework/electrostatic-core/src/libs/electrostatic-primer/electroio/electrokio/ieee1284_module.c)
+* [Serial4j Framework for UART/Modem Control](https://github.com/Electrostat-Lab/Electrostatic-Sandbox/blob/master/electrostatic-sandbox-framework/electrostatic4j/serial4j/serial4j-core/src/main/java/com/serial4j/)
 * [Switching and Finite Automata Theory by Zvi Kohavi, Niraj K. Jha](https://www.amazon.com/Switching-Finite-Automata-Theory-Kohavi/dp/0521857481)
